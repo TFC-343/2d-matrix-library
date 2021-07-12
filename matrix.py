@@ -1,6 +1,9 @@
 # 2d matrix library
 # by Ariel (tfc-343)
 
+from copy import copy
+
+
 class matrix:
     """the storage and calculating of 2d matrices"""
 
@@ -104,37 +107,21 @@ class matrix:
         return (self**-1) * other
 
     def __abs__(self):
-        """will find the determinant of a matrix"""
-        m = self.m
-        n = self.n
-        get = self.get
-        data = self.data
-
-        if m != n:
-            raise self.BaseError("must be square matrix")
-        elif m == 2:
-            return get(1, 1) * get(2, 2) - get(2, 1) * get(1, 2)
-        else:
-            rt = 0
-            for i in range(n):
-                t = ()
-                for j in range(n, m*n):
-                    if (j+1 + n-(i+1)) % n != 0:
-                        t += tuple([data[j]])
-                rt += (-1)**i * data[i] * abs(matrix(m - 1, n - 1, *t))
-            return rt
+        return self.get_determinant()
 
     def __len__(self):
-        return self.m * self.n
+        return len(self.data)
 
     def __invert__(self):
-        return self**-1
+        """referse to get_inverse()"""
+        return self.get_inverse()
 
     def __pow__(self, power):
         """'self' raised to the power of 'power'"""
         m = self.m
         n = self.n
         get = self.get
+
         if n != m:
             raise self.BaseError("Must be a square matrix")
 
@@ -147,16 +134,21 @@ class matrix:
         elif power == 0:
             return matrix.identity_matrix(m)
 
-        elif power == -1:
-            if n != 2:
-                return "WIP"
-            swapped = matrix(2, 2, get(2, 2), -get(1, 2), -get(2, 1), get(1, 1))
-            new = swapped * (1/(get(1, 1)*get(2, 2)-get(1, 2)*get(2, 1)))
-            return new
+        elif power == -1:  # finds the inverse of a matrix
+            if n == 1:
+                return matrix(1, 1, 1/self.get(1, 1))
+            if n == 2:
+                swapped = matrix(2, 2, get(2, 2), -get(1, 2), -get(2, 1), get(1, 1))
+                new = swapped * (1/(get(1, 1)*get(2, 2)-get(1, 2)*get(2, 1)))
+                return new
+            else:
+                new_matrix = self.get_cofactors()
+                transposed = copy(new_matrix)
+                transposed.transpose()
+                return self.get_determinant()**-1 * transposed
 
     def set(self, m, n, new):
         """set data in matrix to new value based on coords"""
-        m_base = self.m
         n_base = self.n
         data = self.data
 
@@ -251,6 +243,75 @@ class matrix:
         data = self.data
 
         return data[(m - 1) * n_base + (n - 1)]  # gets an int from the tuple based on coords
+
+    def get_determinant(self):
+        """will find the determinant of a matrix"""
+        m = self.m
+        n = self.n
+        get = self.get
+        data = self.data
+
+        if m != n:
+            raise self.BaseError("must be square matrix")
+        elif m == 2:
+            return get(1, 1) * get(2, 2) - get(2, 1) * get(1, 2)
+        else:
+            rt = 0
+            for i in range(n):
+                t = ()
+                for j in range(n, m*n):
+                    if (j+1 + n-(i+1)) % n != 0:
+                        t += tuple([data[j]])
+                rt += (-1)**i * data[i] * abs(matrix(m - 1, n - 1, *t))
+            return rt
+
+    def get_inverse(self):
+        """returns the inverse"""
+        return self**-1
+
+    def get_minors(self):
+        """will return a matrix of minors"""
+        m = self.m
+        n = self.n
+        get = self.get
+
+        if m != n:
+            raise self.BaseError("must be square matrix")
+
+        if m == 1:
+            return self
+
+        if m == 2:
+            return matrix(2, 2, get(2, 2), get(2, 1), get(1, 2), get(1, 1))
+
+        new_matrix = copy(self)
+        for i in range(m ** 2):  # cycle though the matrix to find the matrix of minors of each coord
+            t = ()
+            for j in range(m ** 2):
+                if j // m + 1 == i // m + 1 or j % n + 1 == i % n + 1:  # creating the minor matrix
+                    pass
+                else:
+                    t += tuple([get(j // m + 1, j % n + 1)])
+            minor_matrix = matrix(m - 1, n - 1, *t)
+            new_matrix.set(i // m + 1, i % n + 1, minor_matrix.get_determinant())
+        return new_matrix
+
+    def get_cofactors(self):
+        """will return the cofactors of the minors"""
+        m = self.m
+        n = self.n
+
+        if m != n:
+            raise self.BaseError("must be square matrix")
+
+        new_matrix = copy(self)
+        new_matrix = new_matrix.get_minors()
+        for i in range(m**2):
+            if ((i // m + 1) + (i % n + 1)) % 2 != 0:
+                new_matrix.set(i // m + 1, i % n + 1,
+                               -new_matrix.get(i // m + 1, i % n + 1))
+
+        return new_matrix
 
     @staticmethod
     def identity_matrix(m):
