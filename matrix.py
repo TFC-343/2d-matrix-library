@@ -147,6 +147,9 @@ class matrix:
                 transposed.transpose()
                 return self.get_determinant()**-1 * transposed
 
+        elif power < -1:
+            return (self**-power)**-1
+
     def set(self, m, n, new):
         """set data in matrix to new value based on coords"""
         n_base = self.n
