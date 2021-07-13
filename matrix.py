@@ -61,11 +61,7 @@ class matrix:
         if (n != other.n) or (m != other.m):  # check that both bases are equal, if not, raise an error
             raise self.BaseError("Base must be the same when subtracting")
 
-        t = tuple()
-        for i in range(self.n):
-            for j in range(m):
-                t += tuple([self.data[i*m:i*m+m][j] - other.data[i*m:i*m+m][j]])
-        return matrix(m, n, *t)
+        return self+other*-1
 
     def __rsub__(self, other):
         """refer to __sub__"""
@@ -73,9 +69,9 @@ class matrix:
 
     def __mul__(self, other):
         """will multiply matrices"""
-        if isinstance(other, int) or isinstance(other, float):  # a matrix times an int
+        if isinstance(other, int) or isinstance(other, float):  # a matrix times a scalar
             t = tuple([i*other for i in self.data])
-            return matrix(self.n, self.m, *t)
+            return matrix(self.m, self.n, *t)
 
         if isinstance(other, matrix):  # a matrix times a matrix
             if not(self.n == other.m):
@@ -232,7 +228,7 @@ class matrix:
         if p == 'tuple':  # return the matrix as a tuple
             return data
 
-    def get(self, m=0, n=0):
+    def get(self, m, n):
         """returns data in matrix based on coords"""
         n_base = self.n
         data = self.data
@@ -248,6 +244,8 @@ class matrix:
 
         if m != n:
             raise self.BaseError("must be square matrix")
+        elif m == 1:
+            return data[0]
         elif m == 2:
             return get(1, 1) * get(2, 2) - get(2, 1) * get(1, 2)
         else:
@@ -264,18 +262,17 @@ class matrix:
         """returns the inverse"""
         n = self.n
         get = self.get
+        get_cofactors = self.get_cofactors
+        get_determinant = self.get_determinant
 
         if n == 1:
-            return matrix(1, 1, 1/self.get(1, 1))
-        if n == 2:
-            swapped = matrix(2, 2, get(2, 2), -get(1, 2), -get(2, 1), get(1, 1))
-            new = swapped * (1/(get(1, 1)*get(2, 2)-get(1, 2)*get(2, 1)))
-            return new
+            return matrix(1, 1, 1/get(1, 1))
+
         else:
-            new_matrix = self.get_cofactors()
+            new_matrix = get_cofactors()
             transposed = copy(new_matrix)
             transposed.transpose()
-            return self.get_determinant()**-1 * transposed
+            return get_determinant()**-1 * transposed
 
     def get_minors(self):
         """will return a matrix of minors"""
