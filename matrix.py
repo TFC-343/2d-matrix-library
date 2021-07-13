@@ -19,6 +19,8 @@ class matrix:
         :param n: number left
         :param data: all the values in the matrix
         """
+        if not(isinstance(m, int) and isinstance(n, int)) or (m < 1 or n < 1):
+            raise self.TypeError("cannot create matrix with those dimensions")
         self.m = m
         self.n = n
         self.data = data
@@ -39,11 +41,9 @@ class matrix:
         if (n != other.n) or (m != other.m):  # check that both bases are equal, if not, raise an error
             raise self.BaseError("Base must be the same when adding")
 
-        t = tuple()
-        for i in range(self.n):  # this is iterate though the tuple
-            for j in range(m):
-                t += tuple([self.data[i*m:i*m+m][j] + other.data[i*m:i*m+m][j]])
-                # ^^ gets the number from the coords then adds to the same coords on the other matrix
+        t = ()
+        for i in range(m*n):
+            t += tuple([self.get(i // m + 1, i % n + 1) + other.get(i // m + 1, i % n + 1)])
         return matrix(m, n, *t)
 
     def __radd__(self, other):
@@ -102,16 +102,6 @@ class matrix:
         """inverse of 'self' times 'other'"""
         return (self**-1) * other
 
-    def __abs__(self):
-        return self.get_determinant()
-
-    def __len__(self):
-        return len(self.data)
-
-    def __invert__(self):
-        """refer to get_inverse()"""
-        return self.get_inverse()
-
     def __pow__(self, power):
         """'self' raised to the power of 'power'"""
         m = self.m
@@ -124,8 +114,6 @@ class matrix:
             raise self.TypeError("power must be an int")
 
         def exp_by_sqr(x, p):
-            print(p)
-
             if p == -1:
                 return x.get_inverse()
             elif p == 0:
@@ -137,6 +125,33 @@ class matrix:
             elif p % 2 != 0:
                 return x * exp_by_sqr(x * x, (p - 1) // 2)
         return exp_by_sqr(self, power)
+
+    def __abs__(self):
+        return self.get_determinant()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __round__(self, r=None):
+        m = self.m
+        n = self.n
+        new_data = list(copy(self.data))
+        for i in range(m * n):
+            new_data[i] = round(new_data[i], r)
+        return matrix(m, n, *tuple(new_data))
+
+    def __eq__(self, other):
+        return self.m == other.m and self.n == other.n and self.data == other.data
+
+    def __invert__(self):
+        """refer to get_inverse()"""
+        return self.get_inverse()
+
+    def __pos__(self):
+        return self
+
+    def __neg__(self):
+        return self*-1
 
     def set(self, m, n, new):
         """set data in matrix to new value based on coords"""
