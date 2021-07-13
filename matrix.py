@@ -113,42 +113,34 @@ class matrix:
         return len(self.data)
 
     def __invert__(self):
-        """referse to get_inverse()"""
+        """refer to get_inverse()"""
         return self.get_inverse()
 
     def __pow__(self, power):
         """'self' raised to the power of 'power'"""
         m = self.m
         n = self.n
-        get = self.get
 
         if n != m:
             raise self.BaseError("Must be a square matrix")
 
-        if isinstance(power, int) and power > 0:
-            running_total = 1
-            for i in range(power):
-                running_total = running_total * self
-            return running_total
+        if not(isinstance(power, int)):
+            raise self.TypeError("power must be an int")
 
-        elif power == 0:
-            return matrix.identity_matrix(m)
+        def exp_by_sqr(x, p):
+            print(p)
 
-        elif power == -1:  # finds the inverse of a matrix
-            if n == 1:
-                return matrix(1, 1, 1/self.get(1, 1))
-            if n == 2:
-                swapped = matrix(2, 2, get(2, 2), -get(1, 2), -get(2, 1), get(1, 1))
-                new = swapped * (1/(get(1, 1)*get(2, 2)-get(1, 2)*get(2, 1)))
-                return new
-            else:
-                new_matrix = self.get_cofactors()
-                transposed = copy(new_matrix)
-                transposed.transpose()
-                return self.get_determinant()**-1 * transposed
-
-        elif power < -1:
-            return (self**-power)**-1
+            if p == -1:
+                return x.get_inverse()
+            elif p == 0:
+                return matrix.identity_matrix(m)
+            elif p == 1:
+                return x
+            elif p % 2 == 0:
+                return exp_by_sqr(x * x, p // 2)
+            elif p % 2 != 0:
+                return x * exp_by_sqr(x * x, (p - 1) // 2)
+        return exp_by_sqr(self, power)
 
     def set(self, m, n, new):
         """set data in matrix to new value based on coords"""
@@ -270,7 +262,20 @@ class matrix:
 
     def get_inverse(self):
         """returns the inverse"""
-        return self**-1
+        n = self.n
+        get = self.get
+
+        if n == 1:
+            return matrix(1, 1, 1/self.get(1, 1))
+        if n == 2:
+            swapped = matrix(2, 2, get(2, 2), -get(1, 2), -get(2, 1), get(1, 1))
+            new = swapped * (1/(get(1, 1)*get(2, 2)-get(1, 2)*get(2, 1)))
+            return new
+        else:
+            new_matrix = self.get_cofactors()
+            transposed = copy(new_matrix)
+            transposed.transpose()
+            return self.get_determinant()**-1 * transposed
 
     def get_minors(self):
         """will return a matrix of minors"""
