@@ -8,9 +8,14 @@ class matrix:
     """the storage and calculating of 2d matrices"""
 
     class BaseError(Exception):
+        """for errors where the dimensions of the matrix will not work with the matrix"""
         pass
 
     class TypeError(Exception):
+        """for errors where the data type is incorrect"""
+        pass
+
+    class InvertError(Exception):
         pass
 
     def __init__(self, m, n, *data):
@@ -130,9 +135,11 @@ class matrix:
         return self.get_determinant()
 
     def __len__(self):
+        """returns the amount of points in a matrix"""
         return len(self.data)
 
     def __round__(self, r=None):
+        """returns the rounded points in matrix"""
         m = self.m
         n = self.n
         new_data = list(copy(self.data))
@@ -141,6 +148,7 @@ class matrix:
         return matrix(m, n, *tuple(new_data))
 
     def __eq__(self, other):
+        """returns True if all points in a matrix are equal"""
         return self.m == other.m and self.n == other.n and self.data == other.data
 
     def __invert__(self):
@@ -148,9 +156,11 @@ class matrix:
         return self.get_inverse()
 
     def __pos__(self):
+        """positive matrix is just a matrix, so returns original matrix"""
         return self
 
     def __neg__(self):
+        """returns matrix * -1"""
         return self*-1
 
     def set(self, m, n, new):
@@ -279,6 +289,12 @@ class matrix:
         get = self.get
         get_cofactors = self.get_cofactors
         get_determinant = self.get_determinant
+
+        print(get_determinant())
+
+        if get_determinant() == 0:
+            text = "The determinant is 0, the matrix is not invertible"
+            raise self.InvertError(text)
 
         if n == 1:
             return matrix(1, 1, 1/get(1, 1))
