@@ -290,8 +290,6 @@ class matrix:
         get_cofactors = self.get_cofactors
         get_determinant = self.get_determinant
 
-        print(get_determinant())
-
         if get_determinant() == 0:
             text = "The determinant is 0, the matrix is not invertible"
             raise self.InvertError(text)
