@@ -191,23 +191,27 @@ class matrix:
 
         return c
 
-    def flip(self, o='n'):
-        """flips a matrix along an axis"""
+    def flip_n(self):
+        """flips a matrix horizontally (left becomes right)"""
         m = self.m
         n = self.n
         data = self.data
 
-        if o == 'n':  # flips a matrix horizontally (left becomes right)
-            t = ()
-            for i in range(m):
-                t += data[(m-i-1)*n: (m-i-1)*n+n]
-            self.data = t
+        t = ()
+        for i in range(m):
+            t += data[(m-i-1)*n: (m-i-1)*n+n]
+        self.data = t
 
-        if o == 'm':  # flips a matrix vertically (top becomes bottom)
-            t = ()
-            for i in range(m):
-                t += data[i*n: i*n+n][::-1]
-            self.data = t
+    def flip_m(self):
+        """flips a matrix vertically (top becomes bottom)"""
+        m = self.m
+        n = self.n
+        data = self.data
+
+        t = ()
+        for i in range(m):
+            t += data[i * n: i * n + n][::-1]
+        self.data = t
 
     def transpose(self):
         """transposes a matrix"""
@@ -252,6 +256,17 @@ class matrix:
     def get_tuple(self):
         """returns data in tuple form"""
         return self.data
+
+    def get_row(self, num):
+        """returns row based on input (first row is 1)"""
+        return self.get_list()[num-1]
+
+    def get_column(self, num):
+        """returns column based on input (first row is 1)"""
+        t = []
+        for i in range(self.m):
+            t.append(self.data[i*self.n + num - 1])
+        return t
 
     def get(self, m, n):
         """returns data in matrix based on coords"""
