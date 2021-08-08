@@ -235,23 +235,23 @@ class matrix:
                 print(j, end=" ")
             print()
 
-    def get_list(self, p='tuple'):
+    def get_list(self):
         """returns matrix in list form"""
         m_base = self.m
         n_base = self.n
         data = self.data
+        # returns the matrix as an n dimensional list
+        o = []
+        for i in range(m_base):
+            p = []
+            for j in data[i * n_base:i * n_base + n_base]:
+                p.append(j)
+            o.append(p)
+        return o
 
-        if p == 'list':  # returns the matrix as an n dimensional list
-            o = []
-            for i in range(m_base):
-                p = []
-                for j in data[i * n_base:i * n_base + n_base]:
-                    p.append(j)
-                o.append(p)
-            return o
-
-        if p == 'tuple':  # return the matrix as a tuple
-            return data
+    def get_tuple(self):
+        """returns data in tuple form"""
+        return self.data
 
     def get(self, m, n):
         """returns data in matrix based on coords"""
